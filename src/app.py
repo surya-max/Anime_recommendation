@@ -1,5 +1,9 @@
 import streamlit as st
 import random
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
 from src.utils import load_data, preprocess_and_filter_data, compute_svd_and_corr, fetch_anime_details, display_anime_details, paginate_recommendations
 
 st.title("Anime Recommendation System")
