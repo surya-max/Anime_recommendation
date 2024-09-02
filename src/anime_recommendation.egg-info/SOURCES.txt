@@ -1,0 +1,10 @@
+MANIFEST.in
+README.md
+setup.py
+content/anime.csv
+content/rating.csv
+src/anime_recommendation.egg-info/PKG-INFO
+src/anime_recommendation.egg-info/SOURCES.txt
+src/anime_recommendation.egg-info/dependency_links.txt
+src/anime_recommendation.egg-info/requires.txt
+src/anime_recommendation.egg-info/top_level.txt
