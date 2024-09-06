@@ -4,6 +4,7 @@ from sklearn.decomposition import TruncatedSVD
 from scipy.sparse import csr_matrix
 import requests
 import streamlit as st
+import time
 
 # Load data from CSV files
 @st.cache_data
@@ -63,25 +64,33 @@ def compute_svd_and_corr(pivottable):
     corr = np.corrcoef(matrix)
     return corr
 
-# Fetch anime details from an API
+# Fetch anime details from an API with retry logic
 @st.cache_data
 def fetch_anime_details(anime_name):
     base_url = "https://api.jikan.moe/v4/anime"
     query = f"?q={anime_name}&limit=1"
-    try:
-        response = requests.get(base_url + query)
-        response.raise_for_status()
-        data = response.json()
-        if data['data']:
-            anime_info = data['data'][0]
-            return {
-                "title": anime_info.get('title', 'N/A'),
-                "url": anime_info.get('url', '#'),
-                "image_url": anime_info.get('images', {}).get('jpg', {}).get('image_url', ''),
-                "synopsis": anime_info.get('synopsis', 'No synopsis available.')
-            }
-    except requests.RequestException as e:
-        st.error(f"Error fetching anime details: {e}")
+    retries = 5
+    for i in range(retries):
+        try:
+            response = requests.get(base_url + query)
+            response.raise_for_status()
+            data = response.json()
+            if data['data']:
+                anime_info = data['data'][0]
+                return {
+                    "title": anime_info.get('title', 'N/A'),
+                    "url": anime_info.get('url', '#'),
+                    "image_url": anime_info.get('images', {}).get('jpg', {}).get('image_url', ''),
+                    "synopsis": anime_info.get('synopsis', 'No synopsis available.')
+                }
+        except requests.RequestException as e:
+            if response.status_code == 429:
+                # Rate limit exceeded; wait and retry
+                wait_time = 2 ** i  # Exponential backoff
+                time.sleep(wait_time)
+            else:
+                st.error(f"Error fetching anime details: {e}")
+                break
     return None
 
 # Display anime details
@@ -116,9 +125,9 @@ def paginate_recommendations(recommendations, page_size=5):
     with col1:
         if st.button("Previous", disabled=page_number == 0):
             st.session_state.page_number = max(st.session_state.page_number - 1, 0)
-            # st.experimental_rerun()  
+            st.experimental_rerun()
 
     with col2:
         if st.button("Next", disabled=page_number >= total_pages - 1):
             st.session_state.page_number = min(st.session_state.page_number + 1, total_pages - 1)
-            # st.experimental_rerun()  
+            st.experimental_rerun()

@@ -8,7 +8,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
 
 from utils import load_data, preprocess_and_filter_data, compute_svd_and_corr, fetch_anime_details, display_anime_details, paginate_recommendations
 
-st.title("Anime Recommendation System")
+st.set_page_config(page_title="Recommend Anime!")
+
+st.title("Surya's Anime Recommendation System")
 st.subheader("Find anime similar to your favorite shows")
 
 # Initialize progress bar
@@ -53,11 +55,14 @@ if selected_anime:
         val1 = list(pivottable.columns).index(selected_anime)
         recommendations = list(pivottable.columns[(corr[val1] > 0.8) & (corr[val1] < 1)])  # Adjusted threshold
 
+        # Remove the selected anime from recommendations
+        recommendations = [rec for rec in recommendations if rec != selected_anime]
+
         # Fetch and display details of the selected anime
         st.write(f"**{selected_anime.title()} wiki:**")
         selected_anime_details = fetch_anime_details(selected_anime)
         display_anime_details(selected_anime_details)
-        
+
         if recommendations:
             st.write(f"**Shows similar to {selected_anime.title()} are:**")
             paginate_recommendations(recommendations)  # Paginate the recommendations
