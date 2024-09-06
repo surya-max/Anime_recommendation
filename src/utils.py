@@ -125,9 +125,9 @@ def paginate_recommendations(recommendations, page_size=5):
     with col1:
         if st.button("Previous", disabled=page_number == 0):
             st.session_state.page_number = max(st.session_state.page_number - 1, 0)
-            st.experimental_rerun()
+            # st.experimental_rerun()
 
     with col2:
         if st.button("Next", disabled=page_number >= total_pages - 1):
             st.session_state.page_number = min(st.session_state.page_number + 1, total_pages - 1)
-            st.experimental_rerun()
+            # st.experimental_rerun()
